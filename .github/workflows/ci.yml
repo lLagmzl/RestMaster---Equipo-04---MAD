@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  revisar-codigo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Revisar archivos principales
+        run: find . -name index.html -not -path "./.git/*" | grep -q .
+
+      - name: Revisar sintaxis de JavaScript
+        run: |
+          status=0
+          while IFS= read -r -d '' f; do
+            echo "Revisando $f"
+            node --check "$f" || { cp "$f" /tmp/revisar.mjs && node --check /tmp/revisar.mjs; } || status=1
+          done < <(find . -name '*.js' -not -path "./.git/*" -print0)
+          exit $status
