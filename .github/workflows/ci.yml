@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  APP_DIR: "Avance del Sprint 2"
+
 jobs:
   revisar-codigo:
     runs-on: ubuntu-latest
@@ -18,17 +21,20 @@ jobs:
         with:
           node-version: 22
 
+      - name: Mostrar archivos de la aplicación
+        run: find "$APP_DIR" -type f | sort
+
       - name: Revisar archivos principales
         run: |
-          test -f index.html
-          test -f css/style.css
-          test -d js
+          test -f "$APP_DIR/index.html" || { echo "Falta index.html en $APP_DIR"; exit 1; }
+          test -f "$APP_DIR/css/style.css" || { echo "Falta css/style.css en $APP_DIR"; exit 1; }
+          test -d "$APP_DIR/js" || { echo "Falta la carpeta js en $APP_DIR"; exit 1; }
 
       - name: Revisar sintaxis de JavaScript
         run: |
           status=0
-          for f in $(find js -name '*.js'); do
+          while IFS= read -r -d '' f; do
             echo "Revisando $f"
-            node --check "$f" || status=1
-          done
+            node --check "$f" || { cp "$f" /tmp/revisar.mjs && node --check /tmp/revisar.mjs; } || status=1
+          done < <(find "$APP_DIR/js" -name '*.js' -print0)
           exit $status
