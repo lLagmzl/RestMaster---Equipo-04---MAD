@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RestMaster - Sprint 1</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== HU1 - INICIAR SESION ===== -->
+  <section id="login" class="login">
+    <!-- Boton X para cerrar el sistema -->
+    <button type="button" id="btnCerrarSistema" class="x-cerrar" aria-label="Cerrar el sistema" title="Cerrar el sistema">X</button>
+
+    <div class="login-main">
+      <header class="login-head">
+        <h2>BIENVENIDO !</h2>
+        <img src="assets/img/logo.jpg" alt="Logotipo RestMaster">
+      </header>
+
+      <form id="formLogin" novalidate>
+        <h1>INICIAR SESION</h1>
+
+        <!-- Usuario -->
+        <label for="usuario">USUARIO:</label>
+        <div class="campo">
+          <input id="usuario" autocomplete="username">
+          <img src="assets/img/icono-usuario.png" alt="">
+        </div>
+        <p class="err" id="errUsuario" role="alert"></p>
+
+        <!-- Contrasena (con boton del ojo para mostrarla) -->
+        <label for="clave">CONTRASENA:</label>
+        <div class="campo">
+          <input id="clave" type="password" autocomplete="current-password">
+          <button type="button" id="verClave" aria-label="Mostrar contrasena" aria-pressed="false"><img id="ojo" src="assets/img/icono-ojo.png" alt=""></button>
+        </div>
+        <p class="err" id="errClave" role="alert"></p>
+        <p class="err" id="errLogin" role="alert"></p>
+
+        <div class="btn-row">
+          <button class="btn-ing" id="btnLogin" type="submit">INGRESAR</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Imagen de la derecha -->
+    <div class="login-img" role="img" aria-label="Platillo de desayuno"></div>
+  </section>
+
+  <!-- ===== SISTEMA (se muestra despues de iniciar sesion) ===== -->
+  <section id="app" class="app" hidden>
+
+    <!-- HU3 - Menu lateral (los botones se bloquean u ocultan segun el rol) -->
+    <aside class="lateral">
+      <h1 class="marca">Rest Master</h1>
+      <nav aria-label="Menu principal">
+        <button class="side act" type="button" id="btnNavReservas"><img src="assets/img/nav-reservas.png" alt="">Reservar Mesas</button>
+        <button class="side" type="button" id="btnNavInv"><img src="assets/img/nav-inventario.png" alt="">Inventario<span class="badge" id="badgeInv" hidden></span></button>
+        <button class="side" type="button" id="btnNavPers"><img src="assets/img/nav-personal.png" alt="">Registrar Asistencia</button>
+        <button class="side" type="button" id="btnNavAsis"><img src="assets/img/nav-asistencia.png" alt="">Asistencia a Reserva</button>
+        <button class="side" type="button" id="btnSalir"><img src="assets/img/nav-salir.png" alt="">Cerrar Sesion</button>
+      </nav>
+    </aside>
+
+    <main>
+      <!-- Encabezado con la fecha y el usuario -->
+      <header class="encabezado">
+        <div>
+          <p>Bienvenido !</p>
+          <p id="fechaHoy"></p>
+        </div>
+        <div class="quien">
+          <img id="avatar" alt="">
+          <span id="rol"></span>
+        </div>
+      </header>
+
+      <!-- ===== HU4 - PLANO DE MESAS ===== -->
+      <div class="sala">
+        <!-- El plano se dibuja desde js/app.js (construirMapa) -->
+        <div class="mapawrap">
+          <div id="mapa" class="mapa" role="group" aria-label="Plano de mesas. Doble clic en una mesa para ocuparla o liberarla."></div>
+        </div>
+
+        <!-- Panel derecho: filtros, fecha/hora y botones -->
+        <aside class="panel" aria-label="Acciones de mesas">
+          <img class="plogo" src="assets/img/logo-panel.png" alt="">
+
+          <!-- Filtros por estado -->
+          <button class="pb on" data-f="disponible" type="button">Disponible<img src="assets/img/f-disponible.png" alt=""></button>
+          <button class="pb" data-f="ocupada" type="button">Ocupada<img src="assets/img/f-ocupada.png" alt=""></button>
+          <button class="pb" data-f="reservada" type="button">Reservada<img src="assets/img/f-reservada.png" alt=""></button>
+          <button class="pb" data-f="todas" type="button">Todas<img src="assets/img/f-todas.png" alt=""></button>
+
+          <button class="pb" id="bReservar" type="button" disabled>Reservar esta Mesa<img src="assets/img/b-reservar.png" alt=""></button>
+          <button class="pb" id="bEditar" type="button" disabled>Editar Reserva<img src="assets/img/b-editar.png" alt=""></button>
+          <button class="pb" id="bCancelar" type="button" disabled>Cancelar Reserva<img src="assets/img/b-cancelar.png" alt=""></button>
+
+          <!-- Fecha y hora que se estan consultando -->
+          <div class="medio">
+            <label>Fecha<input type="date" id="vFecha"></label>
+            <label>Hora<select id="vHora"></select></label>
+            <button type="button" id="btnHoy">Ir a hoy / ahora</button>
+            <div class="info" id="resumen" aria-live="polite"></div>
+            <div class="info" id="info" aria-live="polite">Selecciona una mesa. Doble clic: ocupar / liberar.</div>
+            <div class="info" id="bannerDist" hidden>
+              <b>Modo mover mesas</b><br>Arrastra cada mesa con el mouse. No se pueden poner sobre paredes, Cocina, Caja ni otras mesas.
+              <div class="bt"><button type="button" id="bSeguir">Seguir editando mesas</button><button type="button" id="bFinDist">Terminar</button></div>
+            </div>
+          </div>
+
+          <button class="pb" id="bAdmin" type="button">Administrar Mesas<img src="assets/img/b-admin.png" alt=""></button>
+        </aside>
+      </div>
+
+      <!-- Pantallas de sprints posteriores (solo el armazon, para que el menu por rol navegue) -->
+
+      <!-- Inventario -->
+      <section id="vistaInv" class="vista inv" hidden aria-labelledby="tInv">
+        <div class="inv-img" role="img" aria-label="Platillos"></div>
+        <div class="inv-main">
+          <div class="inv-top">
+            <h2 id="tInv">INVENTARIO</h2>
+            <button type="button" id="bAddProd" class="inv-add"><img src="assets/img/invAdd.png" alt="">Agregar Producto</button>
+          </div>
+          <div id="alertaInv" class="alerta" role="alert" hidden></div>
+          <div class="tw">
+            <table class="tinv">
+              <thead>
+                <tr><th>ID</th><th>Nombre</th><th>Precio</th><th>Cantidad</th><th>Editar</th><th>Eliminar</th></tr>
+              </thead>
+              <tbody id="tbInv"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Registro de asistencia del personal -->
+      <section id="vistaPers" class="vista pers" hidden aria-labelledby="tPers">
+        <div class="phead">
+          <div><h2>Identificacion</h2><img src="assets/img/aTel.png" alt=""></div>
+          <div><h2 id="tPers">Registro de Asistencia</h2></div>
+        </div>
+        <p class="pronto"><b>Registro de asistencia del personal</b>Esta pantalla se desarrolla en un sprint posterior.</p>
+      </section>
+
+      <!-- Asistencia a reservaciones -->
+      <section id="vistaAsis" class="vista asis" hidden aria-labelledby="tAsis">
+        <div class="th">
+          <h2 id="tAsis">Registro de Asistencia a reservaciones</h2>
+          <img src="assets/img/tMesa.png" alt="">
+        </div>
+        <form id="formAsis" novalidate onsubmit="return false">
+          <!-- Busqueda de la reserva por telefono -->
+          <div class="bd">
+            <div class="fbus">
+              <label class="alab" for="a_buscar">TELEFONO DEL CLIENTE: <img src="assets/img/aTel.png" alt=""></label>
+              <input id="a_buscar" class="ain" inputmode="numeric" autocomplete="off">
+              <button type="button" id="a_btnBuscar" class="abtn"><img src="assets/img/aBus.png" alt="">BUSCAR</button>
+            </div>
+            <p class="err" id="e_abus" role="alert"></p>
+
+            <!-- Datos de la reserva encontrada -->
+            <div class="agrid">
+              <div class="par"><label class="alab" for="a_nom">NOMBRE:</label><input id="a_nom" class="ain" readonly></div>
+              <div class="par"><label class="alab" for="a_tel">TELEFONO:</label><input id="a_tel" class="ain" readonly></div>
+              <div class="par"><label class="alab" for="a_fec">FECHA:</label><input id="a_fec" class="ain" readonly></div>
+              <div class="par"><label class="alab" for="a_hor">HORA:</label><input id="a_hor" class="ain" readonly></div>
+              <div class="par"><label class="alab" for="a_per">PERSONAS:</label><input id="a_per" class="ain" readonly></div>
+              <div class="par"><label class="alab" for="a_mesa">MESA:</label><input id="a_mesa" class="ain" readonly></div>
+            </div>
+          </div>
+          <div class="sep"></div>
+
+          <!-- Confirmacion de asistencia (se programa en otro sprint) -->
+          <div class="bd">
+            <div class="conf">
+              <p><b>Confirme si el cliente asistio a la reserva llenando los datos:</b></p>
+              <div class="abts">
+                <button type="button" id="a_btnMarcar" class="abtn verde">MARCAR ASISTENCIA<img src="assets/img/iOk.png" alt=""></button>
+                <button type="button" id="a_btnCancelar" class="abtn rojo">CANCELAR<img src="assets/img/iNo.png" alt=""></button>
+              </div>
+            </div>
+            <div class="fasi">
+              <span class="alab">ASISTIO? <img src="assets/img/iPer.png" alt=""></span>
+              <label class="chk"><input type="checkbox" id="a_si"> SI</label>
+              <label class="chk"><input type="checkbox" id="a_no"> NO</label>
+            </div>
+            <p class="err" id="e_aasis" role="alert"></p>
+            <div class="fobs">
+              <label class="alab" for="a_lleg">HORA LLEGADA <img src="assets/img/iHor.png" alt=""></label>
+              <input id="a_lleg" class="ain" placeholder="HH:mm" inputmode="numeric" autocomplete="off">
+              <label class="alab" for="a_obs">OBSERVACIONES: <img src="assets/img/aObs.png" alt=""></label>
+              <input id="a_obs" class="ain" maxlength="200" autocomplete="off">
+            </div>
+            <p class="err" id="e_alleg" role="alert"></p>
+            <p class="err" id="e_aobs" role="alert"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+  </section>
+
+  <!-- Ventana emergente (formulario de reserva y administrar mesas) -->
+  <div id="overlay" class="overlay" hidden>
+    <div id="modal" role="dialog" aria-modal="true" aria-label="Dialogo"></div>
+  </div>
+
+  <!-- Cuadro de confirmacion (Si / No) -->
+  <div id="overlay2" class="overlay o2" hidden>
+    <div id="confirmBox" class="modal chico" role="alertdialog" aria-modal="true"></div>
+  </div>
+
+  <!-- Mensajes emergentes -->
+  <div id="toasts" aria-live="polite"></div>
+
+  <noscript>Activa JavaScript para usar RestMaster.</noscript>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
